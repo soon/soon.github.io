@@ -488,3 +488,10 @@ footer {
 .btn:active,
 .btn:focus {
   outline: none; }
+
+@media (max-width: 767px) {
+  .fix-mobile-margin {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
