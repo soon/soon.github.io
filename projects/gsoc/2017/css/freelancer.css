@@ -495,3 +495,9 @@ footer {
     margin-right: 0 !important;
   }
 }
+
+@media (max-width: 767px) {
+  .text-center-mobile {
+    text-align: center!important;
+  }
+}
