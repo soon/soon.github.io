@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Google Summer of Code 2017 - Checkstyle project</title>
+
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet"
+        type="text/css">
+
+  <link href="css/freelancer.min.css" rel="stylesheet">
+
+</head>
+
+<body id="page-top">
+
+<header class="masthead">
+  <div class="container">
+    <div class="intro-text">
+      <span class="name">GSoC 2017 - Checkstyle</span>
+      <hr class="star-light">
+      <span class="skills">Multi-thread mode for Java files processing</span>
+    </div>
+  </div>
+</header>
+
+<section id="overview">
+  <div class="container">
+    <h2 class="text-center">Overview</h2>
+    <hr class="star-primary">
+    <div class="row">
+      <p>
+        As noted in the Checkstyle github repository, <em>“Checkstyle is a development tool to help programmers write
+        Java code that adheres to a coding standard”</em>. It is very extensible and customizable, allowing developers
+        to write their own checks to improve code quality.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="project-idea">
+  <div class="container">
+    <h2 class="text-center">Project idea</h2>
+    <hr class="star-primary">
+    <div class="row">
+      <p>
+        During this GSoC 2017 I have been working on multi-thread support implementation for the Checkstyle runner.
+        The project consists of the following pars:
+      </p>
+
+      <ol>
+        <li>
+          <p>
+            Perform analysis, which parts should be parallelized (you could see my analysis in this issue: #4354).
+            According to these analysis, the most consuming part is TreeWalker module.
+          </p>
+        </li>
+        <li>
+          <p>
+            Implement CLI parameters to control the number of threads.
+          </p>
+        </li>
+        <li>
+          <p>Split all checks into three groups:</p>
+          <ol>
+            <li>
+              <p>
+                Stateless checks. These checks could be used from the separate threads at the same time.
+              </p>
+            </li>
+            <li>
+              <p>
+                File-stateful checks. These checks contains some file-related context and therefore cannot be used
+                from separate threads. Instead, these checks should be cloned for each thread, so there will not be shared
+                resources.
+              </p>
+            </li>
+            <li>
+              <p>
+                Global-stateful checks. These checks must not be cloned, so the developer should control the check
+                thread-safety.
+              </p>
+            </li>
+          </ol>
+        </li>
+        <li>
+          <p>
+            Implement MT mode for Checker module.
+          </p>
+          <p>
+            The ST Checker processes all files inside the same thread.
+            Unlike that, the MT Checker processes all files on a pool of threads.
+          </p>
+        </li>
+        <li>
+          <p>
+            Implement MT mode for TreeWalker module.
+          </p>
+          <p>
+            The MT Checker module works well while checking several files at
+            once,
+            but if a user wants to check a particular file, the MT Checker would not help here.
+            Instead, MT TreeWalker uses thread pool to run TreeWalker checks on that pool.
+          </p>
+        </li>
+        <li>
+          <p>
+            Prepare documentation for the MT Checkstyle mode.
+          </p>
+        </li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="project-status">
+  <div class="container">
+    <h2 class="text-center">Project status</h2>
+    <hr class="star-primary">
+    <div class="row">
+      <h3>Merged Pull Requests</h3>
+      <ol>
+        <li>
+          <p>
+            Issue <a href="https://github.com/checkstyle/checkstyle/issues/4370">#4370</a>,
+            PR <a href="https://github.com/checkstyle/checkstyle/pull/4420">#4420</a>,
+            commit&nbsp<a href="https://github.com/checkstyle/checkstyle/commit/036582d728d2e2bb37f360bb3a74f899f04d587d">036582d728d2e2bb37f360bb3a74f899f04d587d</a>
+          </p>
+          <p>
+            This PR introduces new CLI parameters for enabling MT mode.
+          </p>
+        </li>
+        <li>
+          <p>Issue <a href="https://github.com/checkstyle/checkstyle/issues/4472">#4472</a>, 
+            PR <a href="https://github.com/checkstyle/checkstyle/pull/4595">#4595</a>, 
+            commit&nbsp<a href="https://github.com/checkstyle/checkstyle/commit/a40685f8b2bdfd1fd1b2eea48810033e5821219c">a40685f8b2bdfd1fd1b2eea48810033e5821219c</a></p>
+          <p>This issue blocks initial performance testing, therefore it was also resolved during the GSoC.</p>
+        </li>
+        <li>
+          <p>Issue <a href="https://github.com/checkstyle/checkstyle/pull/4710">#4700</a>,  
+            PR <a href="https://github.com/checkstyle/checkstyle/pull/4710">#4710</a> 
+            commit&nbsp<a href="https://github.com/checkstyle/checkstyle/commit/1003092f9eb986231ab539d0e40f27e1314f47de">1003092f9eb986231ab539d0e40f27e1314f47de</a></p>
+          <p>These changes were made in order to enable IntelliJ inspection, and because they are related to concurrent modifications, they were also made during the GSoC project.</p>
+        </li>
+        <li>
+          <p>Issue <a href="https://github.com/checkstyle/checkstyle/issues/4945">#4945</a>, 
+            PR <a href="https://github.com/checkstyle/checkstyle/pull/4946">#4946</a>, 
+            commit&nbsp<a href="https://github.com/checkstyle/checkstyle/commit/ff85e714498a63c4060121f0625be5c76b741a5a">ff85e714498a63c4060121f0625be5c76b741a5a</a>
+          </p>
+          <p>This PR removes thread-unsafe context from the JavadocPackageCheck module. This is a part of redesigning checks for MT mode.</p>
+        </li>
+        <li>
+          <p>
+            Issue <a href="https://github.com/checkstyle/checkstyle/issues/4927">#4927</a>,
+            PR <a href="https://github.com/checkstyle/checkstyle/pull/4928">#4928</a>, 
+            commit&nbsp<a href="https://github.com/checkstyle/checkstyle/commit/290b5b083e2d00795b08446e6d0dd14f71df9bfd">290b5b083e2d00795b08446e6d0dd14f71df9bfd</a>
+          </p>
+          <p>
+            This PR removes thread-unsafe context from the SeverityLevelCounter module. This is a part of redesigning checks for MT mode.
+          </p>
+        </li>
+        <li>
+          <p>
+            Issue <a href="https://github.com/checkstyle/checkstyle/issues/4925">#4925</a>, 
+            PR <a href="https://github.com/checkstyle/checkstyle/pull/4926">#4926</a>, 
+            commit&nbsp<a href="https://github.com/checkstyle/checkstyle/commit/29901f78ef65899c4c9912b6d49079bdf658d9aa">29901f78ef65899c4c9912b6d49079bdf658d9aa</a>
+          </p>
+          <p>
+            This PR removes thread-unsafe context from the AbstractJavadocCheck module. This is a part of redesigning checks for MT mode.
+          </p>
+        </li>
+        <li>
+          <p>Issue <a href="https://github.com/checkstyle/checkstyle/issues/4932">#4932</a>,
+            PR <a href="https://github.com/checkstyle/checkstyle/pull/4933">#4933</a>,
+            commit&nbsp<a href="https://github.com/checkstyle/checkstyle/commit/0ae5aa2dc43bb923249be897d98b86af5d24cc63">0ae5aa2dc43bb923249be897d98b86af5d24cc63</a></p>
+          <p>This PR removes thread-unsafe context from the XMLLogger class. This is a part of redesigning checks for MT mode.</p>
+        </li>
+      </ol>
+    </div>
+    <div class="row">
+      <h3>Pull requests in review</h3>
+      <ol>
+        <li>
+          <p>Issue <a href="https://github.com/checkstyle/checkstyle/issues/4883">#4883</a>,
+            PR <a href="https://github.com/checkstyle/checkstyle/pull/4898">#4898</a>,
+            commit&nbsp<a href="https://github.com/checkstyle/checkstyle/commit/82eb7c79e79154b17dc7a80165723bf3a5ada2d6">82eb7c79e79154b17dc7a80165723bf3a5ada2d6</a>
+          </p>
+          <p>These changes are closely related to all other components, because they introduces check markers, in order to allow developer to specify the module type - global stateful module, file-stateful module or stateless module.</p>
+        </li>
+        <li>
+          <p>Issue <a href="https://github.com/checkstyle/checkstyle/issues/4870">#4870</a>,
+            PR <a href="https://github.com/checkstyle/checkstyle/pull/4892">#4892</a>, 
+            commit&nbsp<a href="https://github.com/checkstyle/checkstyle/commit/e40d87612ee4488d59138a50e68806831e399893">e40d87612ee4488d59138a50e68806831e399893</a></p>
+          <p>This PR splits existing checks in three groups by marking them with one of previously mentioned check module markers.</p>
+        </li>
+        <li>
+          <p>Issue <a href="https://github.com/checkstyle/checkstyle/issues/4869">#4869</a>,
+            PR <a href="https://github.com/checkstyle/checkstyle/pull/4882">#4882</a>, 
+            commit&nbsp<a href="https://github.com/checkstyle/checkstyle/commit/35a324dd9e3fad8452a0a1aa303a9df733fb8fc2">35a324dd9e3fad8452a0a1aa303a9df733fb8fc2</a></p>
+          <p>This PR introduces a class, responsible for cloning checks for the Checker module. It is required, because there are several file-stateful checks, which cannot be used from the separate threads at the same time. The CheckCloneService clones all file-stateful checks in order to run them on a pool of threads.</p>
+        </li>
+        <li>
+          <p>Issue <a href="https://github.com/checkstyle/checkstyle/issues/4409">#4409</a>, 
+            PR <a href="https://github.com/checkstyle/checkstyle/pull/4890">#4890</a>, 
+            commit&nbsp<a href="https://github.com/checkstyle/checkstyle/commit/95b10ca9ecce31872dcb240c5969c3ea029f0a10">95b10ca9ecce31872dcb240c5969c3ea029f0a10</a></p>
+          <p>This PR implements the MT mode for Checker module. It is responsible for running checks on a pool of threads.</p>
+        </li>
+        <li>
+          <p>Issue <a href="https://github.com/checkstyle/checkstyle/issues/4917">#4917</a>, 
+            PR <a href="https://github.com/checkstyle/checkstyle/pull/4918">#4918</a>,
+            commit&nbsp<a href="https://github.com/checkstyle/checkstyle/commit/8671e59247b3f9d2a807c0e8455f8968675cb00e">8671e59247b3f9d2a807c0e8455f8968675cb00e</a></p>
+          <p>This PR removes thread-unsafe context from the AbstractFileSetCheck module. This is a part of redesigning checks for MT mode.</p>
+        </li>
+        <li>
+          <p>Issue <a href="https://github.com/checkstyle/checkstyle/issues/4908">#4908</a>, 
+            PR <a href="https://github.com/checkstyle/checkstyle/pull/4909">#4909</a>, 
+            commit&nbsp<a href="https://github.com/checkstyle/checkstyle/commit/d1ad0349d25065434272658151c1f8995812587c">d1ad0349d25065434272658151c1f8995812587c</a></p>
+          <p>This PR removes thread-unsafe context from the AbstractCheck module. This is a part of redesigning checks for MT mode.</p>
+        </li>
+      </ol>
+    </div>
+    <div class="row">
+      <h3>Pull requests in progress</h3>
+      <ol>
+        <li>
+          <p>
+            Issue <a href="https://github.com/checkstyle/checkstyle/issues/4957">#4957</a>,
+            PR <a href="https://github.com/checkstyle/checkstyle/pull/4958">#4958</a>,
+            commit&nbsp<a href="https://github.com/checkstyle/checkstyle/pull/4958/commits/f4fe52b2f60cd32d6a13231daaec51d775285db5">f4fe52b2f60cd32d6a13231daaec51d775285db5</a>
+          </p>
+          <p>This PR implements MT mode for TreeWalker module.</p>
+        </li>
+      </ol>
+    </div>
+    <div class="row">
+      <h3>Issues to be done</h3>
+      <ol>
+        <li>
+          <p>Issue <a href="https://github.com/checkstyle/checkstyle/issues/4577">#4577</a> (Add multi thread mode to ANT task)</p>
+          <p>The MT Ant properties were moved to another issue, while resolving issue
+            <a href="https://github.com/checkstyle/checkstyle/issues/4370">#4370</a>,
+            this issue have to be implemented when the main work will be done.</p>
+        </li>
+        <li>
+          <p>Issue <a href="https://github.com/checkstyle/checkstyle/issues/4547">#4547</a> (Add MT properties to documentation)</p>
+          <p>Here is a documentation draft: <a href="https://docs.google.com/document/d/1IMDix_nbAMNjiyBWBPRL8ZeiHUuSnELRZ8WpuImgtMc/edit">Google Docs</a></p>
+        </li>
+        <li>
+          <p>Issue <a href="https://github.com/checkstyle/checkstyle/issues/4894">#4894</a> (Prepare performance report for MT mode)</p>
+          <p>The initial performance report shows, that MT version faster by ~20% than ST version.
+            The complete performance report should be prepared after the project is finished</p>
+        </li>
+        <li>
+          <p>Issue <a href="https://github.com/checkstyle/checkstyle/issues/4896">#4896</a> (Add documentation on how to design checks in MT modes)</p>
+          <p>Here is a documentation draft: <a href="https://docs.google.com/document/d/1IMDix_nbAMNjiyBWBPRL8ZeiHUuSnELRZ8WpuImgtMc/edit">Google Docs</a></p>
+        </li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="learned">
+  <div class="container">
+    <h2 class="text-center">What have I learned during GSoC</h2>
+    <hr class="star-primary">
+    <div class="row">
+      <p>
+        First of all, checkstyle uses code coverage metrics to maintain code quality, and, what is more important,
+        it requires 100% code coverage for all new code. Previously,
+        I have not faced with projects whose requirements were so strict (usually, projects requires about 75-85% of code coverage).
+        Moreover, the checkstyle project actively uses mutation-based code coverage, which was a new approach for me.
+        Despite that I have used tests in my own projects, I have never wrote so many tests for a bug fix or
+        a new feature and therefore, during this summer I have learned a lot about project testing.
+      </p>
+      <p>
+        Also, checkstyle has a really good code quality - it is due to fact that before the new code is merged to the
+        master branch, it must pass all CI checks (checkstyle, pmd, IDEA, code coverage and others) and the
+        PR must pass the code review. Also, you may not create a PR before opening an issue (otherwise this will
+        lead to CI failures), and the issue should describe the problem you are trying to resolve. This is a very good
+        feature, because code history is very important - no one wants to see a commit&nbspnamed “hot fix” in the git history.
+        All checkstyle commits must include a GitHub issue they are resolving and a short exhaustive description.
+        When building my own CI checks, I will definitely include this check into commit&nbspvalidation.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="acknowledgement">
+  <div class="container">
+    <h2 class="text-center">Acknowledgement</h2>
+    <hr class="star-primary">
+    <div class="row">
+      <p>
+        I would like to thank my mentors - <a href="https://github.com/sabaka">Ilia&nbspDubinin</a> and
+        <a href="https://github.com/vladlis">Vladislav&nbspLisetskii</a>, they were very responsive and
+        I learned a lot while working with them. Also I would like to thank
+        <a href="https://github.com/MEZk">Andrei&nbspSelkin</a> for helping me in resolving issues.
+        And of course special thanks to to <a href="https://github.com/romani">Roman&nbspIvanov</a>,
+        <a href="https://github.com/rnveach">rnveach</a> and all checkstyle team members.
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer class="text-center">
+  <div class="footer-below">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <ul class="list-inline">
+            <li class="list-inline-item">
+              <a class="btn-social btn-outline" href="https://stackoverflow.com/users/1532460/soon" title="Stack Overflow">
+                <i class="fa fa-fw fa-stack-overflow"></i>
+              </a>
+            </li>
+            <li class="list-inline-item">
+              <a class="btn-social btn-outline" href="https://github.com/soon" title="GitHub">
+                <i class="fa fa-fw fa-github"></i>
+              </a>
+            </li>
+            <li class="list-inline-item">
+              <a class="btn-social btn-outline" href="https://t.me/soontimes" title="Telegram">
+                <i class="fa fa-fw fa-telegram"></i>
+              </a>
+            </li>
+          </ul>
+          Copyright &copy; Andrey Kuchev 2017
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="vendor/popper/popper.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+
+
+<script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+<script src="js/jqBootstrapValidation.js"></script>
+<script src="js/contact_me.js"></script>
+
+<script src="js/freelancer.js"></script>
+
+</body>
+
+</html>
